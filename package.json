@@ -13,6 +13,7 @@
     "@ai-sdk/openai": "^0.0.58",
     "@anthropic-ai/sdk": "^0.20.4",
     "ai": "^3.3.30",
+    "llamaai": "^1.0.4",
     "next": "14.2.8",
     "openai": "^4.33.0",
     "openai-edge": "^1.2.2",
