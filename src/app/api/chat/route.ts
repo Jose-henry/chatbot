@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
 // META Llama API with vercel ai sdk
 
-import { createOpenAI as createGroq } from '@ai-sdk/openai'
+/* import { createOpenAI as createGroq } from '@ai-sdk/openai'
 import { streamText, convertToCoreMessages } from 'ai';
 
 
@@ -101,4 +101,39 @@ export async function POST(request: Request) {
     console.error('Error creating chat completion:', error);
     return new Response('Internal Server Error', { status: 500 });
   }
+} */
+
+
+
+// META Llama API with vercel ai sdk and pdf upload
+import { createOpenAI as createGroq } from '@ai-sdk/openai'
+import { streamText, convertToCoreMessages } from 'ai';
+
+const groq = createGroq({
+    baseURL: 'https://api.groq.com/openai/v1',
+    apiKey: process.env.GROQ_API_KEY,
+});
+
+export const maxDuration = 300;
+export const runtime = 'edge'
+
+export async function POST(request: Request) {
+   const { messages, pdfContent } = await request.json();
+
+   const systemMessage = {
+     role: 'system',
+     content: `You are a helpful assistant. You explain software concepts simply to intermediate programmers but in the way of the philosophy of Aristotle. ${pdfContent ? 'Use the following context from the uploaded PDF to inform your responses:' : ''}\n\n${pdfContent || ''}`
+   };
+
+   try {
+     const response = await streamText({
+       model: groq('llama-3.1-70b-versatile'),
+       messages: convertToCoreMessages([systemMessage, ...messages]),
+     });
+
+     return response.toDataStreamResponse();
+   } catch (error) {
+     console.error('Error creating chat completion:', error);
+     return new Response('Internal Server Error', { status: 500 });
+   }
 }
